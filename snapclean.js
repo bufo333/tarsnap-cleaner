@@ -1,21 +1,20 @@
-var cmd = "tarsnap";
-var listopt = ["--list-archives"];
-var spawn = require('child_process').spawn;
-var delopt1 = "-d";
-var delopt2 = "-f";
-var result = "";
-var maxAge;
-var go = 1;
-var result;
+let cmd = "tarsnap";
+let listOpt = ["--list-archives"];
+let spawn = require('child_process').spawn;
+let delOpt1 = "-d";
+let delOpt2 = "-f";
+let result = "";
+let maxAge;
+let result;
 // print process.argv
 process.argv.forEach(function(val, index, array) {
     args = array;
 });
 
 function getDates(result, callback) {
-    var year, month, day;
-    for (var i = 0; i < result.length;) {
-        var obj = {};
+    let year, month, day;
+    for (let i = 0; i < result.length;) {
+        let obj = {};
         obj.year = result[i].slice(7, 11);
         obj.month = result[i].slice(11, 13);
         obj.day = result[i].slice(13, 15);
@@ -33,7 +32,7 @@ function getDates(result, callback) {
 }
 
 function deleteBackups(result, callback) {
-    var count = 0;
+    let count = 0;
     makeDecision(CB, callback);
 
     function makeDecision(CB, callback) {
@@ -43,7 +42,7 @@ function deleteBackups(result, callback) {
         }
         if (result[count].delete) {
             console.log('Deleting ' + result[count].name);
-            runProcess([delopt1, delopt2, result[count].name], CB);
+            runProcess([delOpt1, delOpt2, result[count].name], CB);
         } else {
             console.log('Skipping ' + result[count].name);
             count++
@@ -68,7 +67,7 @@ function deleteBackups(result, callback) {
 
 
 function getListOfBackups(callback) {
-    runProcess(listopt, function(results) {
+    runProcess(listOpt, function(results) {
         result = results.split('\n');
         if (result[-1] == undefined) {
             result.pop();
@@ -86,11 +85,11 @@ function ageToMS(age) {
 }
 
 function timeToDelete(obj, callback) {
-    var backupDate;
-    var year = obj.year;
-    var month = obj.month;
-    var day = obj.day;
-    var currentDate;
+    let backupDate;
+    let year = obj.year;
+    let month = obj.month;
+    let day = obj.day;
+    let currentDate;
 
     backupDate = new Date(year, month, day);
     currentDate = new Date();
@@ -103,11 +102,17 @@ function timeToDelete(obj, callback) {
     }
 }
 
-function runProcess(g, callback) {
 
-    var child = spawn(cmd, g);
-    var results;
-    var ee;
+/**
+ * Runs an external program on the command line.
+ * @param Array
+ * @param Callback function
+ */
+function runProcess(arguments, callback) {
+
+    let child = spawn(cmd, arguments);
+    let results;
+    let ee;
     child.stdout.on('data', function(chunk) {
         results += chunk;
     });
@@ -119,10 +124,12 @@ function runProcess(g, callback) {
     child.stderr.on('data', function(chunk) {
         ee += chunk;
     });
-    child.stderr.on('end', function() {});
+    child.stderr.on('end', function() {
+      if(ee){ throw ee;}
+    });
 }
 
-ageToMS(30);
+ageToMS(args[2]=30);
 getListOfBackups(function() {
     console.log('Get List of Backups...');
     getDates(result, function() {
