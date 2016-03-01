@@ -1,16 +1,18 @@
+'use strict';
 let cmd = "tarsnap";
 let listOpt = ["--list-archives"];
 let spawn = require('child_process').spawn;
 let delOpt1 = "-d";
 let delOpt2 = "-f";
-let result = "";
 let maxAge;
 let result;
-// print process.argv
-process.argv.forEach(function(val, index, array) {
-    args = array;
-});
+let args;
 
+/**
+ * converts backup name to date to be used in calculating age of backup
+ * @param Array
+ * @param Callback function
+ */
 function getDates(result, callback) {
     let year, month, day;
     for (let i = 0; i < result.length;) {
@@ -31,10 +33,16 @@ function getDates(result, callback) {
     }
 }
 
+/**
+ * Deletes backups older than 30 days.
+ * @param Array
+ * @param Callback function
+ * Function is recursive, and has 2 inner functions used as callbacks
+ * CB and makeDecision with the latter wrapping CB
+ */
 function deleteBackups(result, callback) {
     let count = 0;
     makeDecision(CB, callback);
-
     function makeDecision(CB, callback) {
         if (count === result.length) {
             callback();
@@ -50,26 +58,28 @@ function deleteBackups(result, callback) {
                 callback();
                 return;
             }
-            makeDecision(CB, callback);
+            makeDecision(CB, callback); //recursive call of makedecision
         }
     }
-
     function CB(res, callback) {
         count++;
         if (count - 1 === result.length) {
             callback();
             return
         } else {
-            makeDecision(CB, callback);
+            makeDecision(CB, callback); //recursive call of makedecision
         }
     }
 }
 
-
+/**
+ * Pulls latest updates from tarsnap and cleans up results
+ * @param Callback function
+ */
 function getListOfBackups(callback) {
     runProcess(listOpt, function(results) {
         result = results.split('\n');
-        if (result[-1] == undefined) {
+        if (result[-1] === undefined) {
             result.pop();
         }
         result[0] = result[0].slice(9);
@@ -78,22 +88,29 @@ function getListOfBackups(callback) {
 
 }
 
-
+/**
+ * Finds the user enterred max backup age and converts to ms
+ * @param integer
+ */
 function ageToMS(age) {
     maxAge = age * 86400000
-    return maxAge;
+    return;
 }
 
+/**
+ * Calculates if backup is older than 30 days
+ * @param Object
+ * @param Callback function
+ */
 function timeToDelete(obj, callback) {
     let backupDate;
     let year = obj.year;
     let month = obj.month;
     let day = obj.day;
     let currentDate;
-
     backupDate = new Date(year, month, day);
     currentDate = new Date();
-    ageInMs = currentDate - backupDate;
+    let ageInMs = currentDate - backupDate;
 
     if (ageInMs > maxAge) {
         callback(true);
@@ -108,9 +125,9 @@ function timeToDelete(obj, callback) {
  * @param Array
  * @param Callback function
  */
-function runProcess(arguments, callback) {
+function runProcess(cmdArguments, callback) {
 
-    let child = spawn(cmd, arguments);
+    let child = spawn(cmd, cmdArguments);
     let results;
     let ee;
     child.stdout.on('data', function(chunk) {
@@ -128,6 +145,18 @@ function runProcess(arguments, callback) {
       if(ee){ throw ee;}
     });
 }
+
+process.argv.forEach(function(val, index, array) {
+    args = array;
+});
+
+if (args.length!>2){
+  console.log("\nThe first argument should be the length of time in days \n");
+  console.log("of the oldest backup. If an argument is not entered a\n");
+  console.log("default of 30 days will be used. All backups older than\n");
+  console.log("30 days will be deleted!");
+}
+
 
 ageToMS(args[2]=30);
 getListOfBackups(function() {
