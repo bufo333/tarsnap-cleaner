@@ -1,7 +1,7 @@
 # tarsnap-cleaner
 Node.js application to manage tarsnap backups
 
-**WARNING** Right now the app, will look at all backups on tarsnap for a given host, the prefix functionality is not yet implemented **WARNING**
+**WARNING** Right now the app, will look at all backups on tarsnap for a given host, the prefix functionality is not yet implemented
 
 ### Usage.
 Backups using tarsnap should take the following format for the naming convention. some_random_length ending with 4 digit year 2 digit month and 2 digit day. For example backup-20101123 which is backup for November 23 2010 in this case. the following command line tarsnap argument should serve as an example.
@@ -19,11 +19,11 @@ A best practice would be to schedule your crontab as follows:
 `tarsnap --keyfile /path/to/tarsnap.key  -c -f monthly-`date +\%Y\%m\%d` /`
 
 
-Tarsnap-cleaner should be used as follows:
+####Tarsnap-cleaner should be used as follows:
 
 `node snapclean.js <max age of backup>  <prefix> defaults to 30 days`
 
-Examples
+####Examples
 `node snapclean.js 30 weekly    // This command will delete any weekly backups older than 30 days`
 `node snapclean.js 360 monthly  // This command will delete any monthly backups older than 30 days`
 `node snapclean.js 14 daily  // This command will delete any daily backups older than 14 days`
