@@ -1,9 +1,9 @@
 # tarsnap-cleaner
 Node.js application to manage tarsnap backups
 
-Usage.
 **WARNING** Right now the app, will look at all backups on tarsnap for a given host, the prefix functionality is not yet implemented **WARNING**
 
+Usage.
 Backups using tarsnap should take the following format for the naming convention. some_random_length ending with 4 digit year 2 digit month and 2 digit day. For example backup-20101123 which is backup for November 23 2010 in this case. the following command line tarsnap argument should serve as an example.
 
 tarsnap --keyfile /path/to/tarsnap.key  -c -f backup-`date +\%Y\%m\%d` /
