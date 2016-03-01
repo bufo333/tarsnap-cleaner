@@ -17,9 +17,9 @@ function getDates(result, callback) {
     let year, month, day;
     for (let i = 0; i < result.length;) {
         let obj = {};
-        obj.year = result[i].slice(7, 11);
-        obj.month = result[i].slice(11, 13);
-        obj.day = result[i].slice(13, 15);
+        obj.year = result[i].slice(result[i].length-8,result[i].length-4);
+        obj.month = result[i].slice(result[i].length-4, result[i].length-2);
+        obj.day = result[i].slice(result[i].length-2, result[i].length);
         obj.name = result[i];
         timeToDelete(obj, function(res) {
             obj.delete = res;
