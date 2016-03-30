@@ -1,4 +1,6 @@
 'use strict';
+
+
 let cmd = "tarsnap";
 let listOpt = ["--list-archives"];
 let spawn = require('child_process').spawn;
@@ -6,14 +8,14 @@ let delOpt1 = "-d";
 let delOpt2 = "-f";
 let maxAge;
 let result;
-let args;
+let tmpResult=[];
 
 /**
  * converts backup name to date to be used in calculating age of backup
  * @param Array
  * @param Callback function
  */
-function getDates(result, callback) {
+exports.getDates = function(result, callback) {
     let year, month, day;
     for (let i = 0; i < result.length;) {
         let obj = {};
@@ -21,7 +23,7 @@ function getDates(result, callback) {
         obj.month = result[i].slice(result[i].length-4, result[i].length-2);
         obj.day = result[i].slice(result[i].length-2, result[i].length);
         obj.name = result[i];
-        timeToDelete(obj, function(res) {
+        exports.timeToDelete(obj, function(res) {
             obj.delete = res;
             result[i] = obj;
             obj = {};
@@ -40,17 +42,16 @@ function getDates(result, callback) {
  * Function is recursive, and has 2 inner functions used as callbacks
  * CB and makeDecision with the latter wrapping CB
  */
-function deleteBackups(result, callback) {
+exports.deleteBackups = function(result, callback) {
     let count = 0;
-    makeDecision(CB, callback);
-    function makeDecision(CB, callback) {
+    exports.makeDecision = function(CB, callback) {
         if (count === result.length) {
             callback();
             return;
         }
         if (result[count].delete) {
             console.log('Deleting ' + result[count].name);
-            runProcess([delOpt1, delOpt2, result[count].name], CB);
+            exports.runProcess([delOpt1, delOpt2, result[count].name], CB);
         } else {
             console.log('Skipping ' + result[count].name);
             count++
@@ -58,16 +59,17 @@ function deleteBackups(result, callback) {
                 callback();
                 return;
             }
-            makeDecision(CB, callback); //recursive call of makedecision
+            exports.makeDecision(CB, callback); //recursive call of makedecision
         }
     }
-    function CB(res, callback) {
+    exports.makeDecision(exports.CB, callback);
+    exports.CB = function(res, callback) {
         count++;
         if (count - 1 === result.length) {
             callback();
             return
         } else {
-            makeDecision(CB, callback); //recursive call of makedecision
+            exports.makeDecision(CB, callback); //recursive call of makedecision
         }
     }
 }
@@ -76,13 +78,38 @@ function deleteBackups(result, callback) {
  * Pulls latest updates from tarsnap and cleans up results
  * @param Callback function
  */
-function getListOfBackups(callback) {
-    runProcess(listOpt, function(results) {
+exports.getListOfBackups = function(mode, callback) {
+    exports.runProcess(listOpt, function(results) {
+        let index;
         result = results.split('\n');
         if (result[-1] === undefined) {
             result.pop();
         }
         result[0] = result[0].slice(9);
+
+        if(mode === '-d'){
+        for (index in result){
+          if(result[index] !== undefined && result[index].substring(0,3) === 'dai'){
+            tmpResult.push(result[index]);
+          }
+        }
+        result=tmpResult;
+      }else if (mode === '-m'){
+        for (index in result){
+          if(result[index] !== undefined && result[index].substring(0,3) === 'mon'){
+            tmpResult.push(result[index]);
+          }
+        }
+        result=tmpResult;
+      }else if (mode === '-y'){
+        for (index in result){
+          if(result[index] !== undefined && result[index].substring(0,3) === 'yea'){
+            tmpResult.push(result[index]);
+          }
+        }
+        result=tmpResult;
+      }
+
         callback();
     });
 
@@ -92,8 +119,17 @@ function getListOfBackups(callback) {
  * Finds the user enterred max backup age and converts to ms
  * @param integer
  */
-function ageToMS(age) {
-    maxAge = age * 86400000
+exports.ageToMS = function(mode, age) {
+
+    if(mode.toLowerCase() === "-d"){
+      maxAge = age * 86400000;
+    }
+    else if(mode.toLowerCase() === "-m"){
+      maxAge = age * 30 * 86400000;
+    }
+    else if(mode.toLowerCase() === "-y"){
+      maxAge= age * 365 * 86400000;
+    }
     return;
 }
 
@@ -102,7 +138,7 @@ function ageToMS(age) {
  * @param Object
  * @param Callback function
  */
-function timeToDelete(obj, callback) {
+ exports.timeToDelete = function(obj, callback) {
     let backupDate;
     let year = obj.year;
     let month = obj.month;
@@ -125,7 +161,7 @@ function timeToDelete(obj, callback) {
  * @param Array
  * @param Callback function
  */
-function runProcess(cmdArguments, callback) {
+exports.runProcess = function(cmdArguments, callback) {
 
     let child = spawn(cmd, cmdArguments);
     let results;
@@ -145,26 +181,16 @@ function runProcess(cmdArguments, callback) {
       if(ee){ throw ee;}
     });
 }
-
-process.argv.forEach(function(val, index, array) {
-    args = array;
-});
-
-if (args.length!>2){
-  console.log("\nThe first argument should be the length of time in days \n");
-  console.log("of the oldest backup. If an argument is not entered a\n");
-  console.log("default of 30 days will be used. All backups older than\n");
-  console.log("30 days will be deleted!");
-}
-
-
-ageToMS(args[2]=30);
-getListOfBackups(function() {
+exports.main = function(mode, value) {
+exports.ageToMS(mode,value);
+exports.getListOfBackups(mode,function() {
     console.log('Get List of Backups...');
-    getDates(result, function() {
+    exports.getDates(result, function() {
         console.log('Calculate Dates for Deletion...');
-        deleteBackups(result, function() {
+        exports.deleteBackups(result, function() {
             console.log('All old backups have been deleted!');
         });
     });
 });
+};
+exports.main('-d',4);
