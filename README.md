@@ -10,7 +10,7 @@ A best practice would be to schedule your crontab as follows:
 // Daily backups     //Scheduled to run every day but one.
 ````tarsnap --keyfile /path/to/tarsnap.key  -c -f daily-`date +\%Y\%m\%d` /   ````
 
-//Mearly backups, set to run once a week on the same day
+//Yearly backups, set to run once a year on the same day
 ```tarsnap --keyfile /path/to/tarsnap.key  -c -f yearly-`date +\%Y\%m\%d` /```
 
 //Monthly backups set to run on the same date every month e.g. the first of the month
