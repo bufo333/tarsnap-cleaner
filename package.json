@@ -1,0 +1,26 @@
+{
+  "name": "tarsnap-cleaner",
+  "version": "1.0.0",
+  "description": "Manages life cycle of tarsnap backups",
+  "main": "snapclean.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bufo333/tarsnap-cleaner.git"
+  },
+  "keywords": [
+    "tarsnap",
+    "backups",
+    "management"
+  ],
+  "author": "John Burns",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/bufo333/tarsnap-cleaner/issues"
+  },
+  "homepage": "https://github.com/bufo333/tarsnap-cleaner#readme"
+}
