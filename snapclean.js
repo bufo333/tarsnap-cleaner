@@ -143,7 +143,7 @@ exports.timeToDelete = function (obj, callback) {
     let month = obj.month;
     let day = obj.day;
     let currentDate;
-    backupDate = new Date(year, month, day);
+    backupDate = new Date(year, month-1, day);
     currentDate = new Date();
     let ageInMs = currentDate - backupDate;
 
@@ -178,7 +178,8 @@ exports.runProcess = function (cmdArguments, callback) {
     });
     child.stderr.on('end', function () {
         if (ee) {
-            throw ee;
+            console.log("\n" + ee + "\n");
+
         }
     });
 }
