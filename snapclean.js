@@ -7,7 +7,7 @@ let spawn = require('child_process').spawn;
 let delOpt1 = "-d";
 let delOpt2 = "-f";
 let maxAge;
-let result;
+let result="";
 let tmpResult = [];
 
 /**
@@ -163,7 +163,7 @@ exports.timeToDelete = function (obj, callback) {
 exports.runProcess = function (cmdArguments, callback) {
 
     let child = spawn(cmd, cmdArguments);
-    let results;
+    let results="";
     let ee;
     child.stdout.on('data', function (chunk) {
         results += chunk;
